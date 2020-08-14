@@ -25,8 +25,7 @@ type Path struct {
 	Event zdb.Bool `db:"event"`
 }
 
-func (p *Path) Defaults(ctx context.Context) {
-}
+func (p *Path) Defaults(ctx context.Context) {}
 
 func (p *Path) Validate(ctx context.Context) error {
 	v := zvalidate.New()
