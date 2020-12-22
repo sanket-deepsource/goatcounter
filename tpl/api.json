@@ -162,6 +162,7 @@
     },
     "/api/v0/export/{id}/download": {
       "get": {
+        "description": "The export may take a while to generate, depending on the size. It will\nreturn a 202 Accepted status code if the export ID is still running.\n\nExport files are kept for 24 hours, after which they're deleted. This will\nreturn a 400 Gone status code if the export has been deleted.",
         "operationId": "GET_api_v0_export_{id}_download",
         "parameters": [
           {
@@ -178,6 +179,12 @@
         "responses": {
           "200": {
             "description": "200 OK (text/csv data)"
+          },
+          "202": {
+            "description": "202 Accepted",
+            "schema": {
+              "$ref": "#/definitions/handlers.apiError"
+            }
           },
           "400": {
             "description": "400 Bad Request",
@@ -256,7 +263,7 @@
             }
           }
         },
-        "summary": "List the current site and all additional sites.",
+        "summary": "List all sites.",
         "tags": [
           "sites"
         ]
@@ -592,6 +599,7 @@
     },
     "goatcounter.SiteSettings": {
       "title": "SiteSettings",
+      "description": "SiteSettings contains all the user-configurable settings for a site, with\nthe exception of the domain and billing settings.\n\nThis is stored as JSON in the database.",
       "type": "object",
       "properties": {
         "allow_admin": {
@@ -618,20 +626,6 @@
             "type": "string"
           }
         },
-        "limits": {
-          "type": "object",
-          "properties": {
-            "hchart": {
-              "type": "integer"
-            },
-            "page": {
-              "type": "integer"
-            },
-            "ref": {
-              "type": "integer"
-            }
-          }
-        },
         "number_format": {
           "type": "string"
         },
@@ -646,6 +640,18 @@
         },
         "twenty_four_hours": {
           "type": "boolean"
+        },
+        "views": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/goatcounter.View"
+          }
+        },
+        "widgets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/goatcounter.Widget"
+          }
         }
       }
     },
@@ -698,6 +704,32 @@
           "readOnly": true
         }
       }
+    },
+    "goatcounter.View": {
+      "title": "View",
+      "type": "object",
+      "properties": {
+        "as-text": {
+          "type": "boolean"
+        },
+        "daily": {
+          "type": "boolean"
+        },
+        "filter": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "period": {
+          "description": "\"week\", \"week-cur\", or n days: \"8\"",
+          "type": "string"
+        }
+      }
+    },
+    "goatcounter.Widget": {
+      "title": "Widget",
+      "type": "object"
     },
     "handlers.APICountRequest": {
       "title": "APICountRequest",
@@ -780,10 +812,10 @@
       "title": "apiError",
       "type": "object",
       "properties": {
-        "Error": {
+        "error": {
           "type": "string"
         },
-        "Errors": {
+        "errors": {
           "type": "object"
         }
       }
@@ -852,8 +884,11 @@
       "type": "object",
       "properties": {
         "Abbr": {
-          "description": "WITA",
-          "type": "string"
+          "description": "WITA – the correct abbreviation may change depending on the time of year (i.e. CET and CEST, depending on DST).",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "Comments": {
           "description": "Borneo (east, south); Sulawesi/Celebes, Bali, Nusa Tengarra; Timor (west)",

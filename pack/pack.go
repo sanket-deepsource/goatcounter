@@ -16810,13 +16810,19 @@ listed have been processed and shouldn&#39;t be sent again.</p>
 				<a class="permalink" href="#GET-%2fapi%2fv0%2fexport%2f%7bid%7d%2fdownload">§</a>
 			</div>
 			<div class="endpoint-info">
-				<p></p>
+				<p>The export may take a while to generate, depending on the size. It will
+return a 202 Accepted status code if the export ID is still running.</p><p>Export files are kept for 24 hours, after which they&#39;re deleted. This will
+return a 400 Gone status code if the export has been deleted.</p>
 
 				<h4>Responses</h4>
 				<ul>
 					<li><code class="param-name">200 OK</code>
 								<p>200 OK (text/csv data)</p>
 							<sup>(text/csv)</sup>
+					</li>
+					<li><code class="param-name">202 Accepted</code>
+								<a href="#handlers.apiError">handlers.apiError</a>
+							<sup>(application/json)</sup>
 					</li>
 					<li><code class="param-name">400 Bad Request</code>
 								<a href="#handlers.apiError">handlers.apiError</a>
@@ -16866,7 +16872,7 @@ listed have been processed and shouldn&#39;t be sent again.</p>
 		<div class="endpoint" id="GET-/api/v0/sites">
 			<div class="endpoint-top">
 				<code class="resource"><span class="method">GET</span> /api/v0/sites</code>
-				List the current site and all additional sites.
+				List all sites.
 				<a class="permalink" href="#GET-%2fapi%2fv0%2fsites">§</a>
 			</div>
 			<div class="endpoint-info">
@@ -17126,10 +17132,21 @@ pageview.</p>
 		</div>
 		<h3 id="goatcounter.SiteSettings">goatcounter.SiteSettings <a class="permalink" href="#goatcounter.SiteSettings">§</a></h3>
 		<div class="endpoint model">
-			<p class="info"></p>
+			<p class="info">SiteSettings contains all the user-configurable settings for a site, with
+the exception of the domain and billing settings.
+
+This is stored as JSON in the database.</p>
 			<h4>public <sup>boolean</sup></h4>
 <p></p>
 <h4>allow_counter <sup>boolean</sup></h4>
+<p></p>
+<h4>allow_admin <sup>boolean</sup></h4>
+<p></p>
+<h4>data_retention <sup>integer</sup></h4>
+<p></p>
+<h4>campaigns <sup>array [type: string]</sup></h4>
+<p></p>
+<h4>ignore_ips <sup>array [type: string]</sup></h4>
 <p></p>
 <h4>twenty_four_hours <sup>boolean</sup></h4>
 <p></p>
@@ -17139,17 +17156,11 @@ pageview.</p>
 <p></p>
 <h4>number_format <sup>string</sup></h4>
 <p></p>
-<h4>data_retention <sup>integer</sup></h4>
-<p></p>
-<h4>ignore_ips <sup>array [type: string]</sup></h4>
-<p></p>
 <h4>timezone <sup></sup></h4>
 <p></p>
-<h4>campaigns <sup>array [type: string]</sup></h4>
+<h4>widgets <sup>array [type: <a href="#goatcounter.Widget">goatcounter.Widget</a>]</sup></h4>
 <p></p>
-<h4>allow_admin <sup>boolean</sup></h4>
-<p></p>
-<h4>limits <sup><a href="#"></a></sup></h4>
+<h4>views <sup>array [type: <a href="#goatcounter.View">goatcounter.View</a>]</sup></h4>
 <p></p>
 
 		</div>
@@ -17177,6 +17188,26 @@ pageview.</p>
 <h4>updated_at <sup>string [format: date-time] [readonly]</sup></h4>
 <p></p>
 
+		</div>
+		<h3 id="goatcounter.View">goatcounter.View <a class="permalink" href="#goatcounter.View">§</a></h3>
+		<div class="endpoint model">
+			<p class="info"></p>
+			<h4>name <sup>string</sup></h4>
+<p></p>
+<h4>filter <sup>string</sup></h4>
+<p></p>
+<h4>daily <sup>boolean</sup></h4>
+<p></p>
+<h4>as-text <sup>boolean</sup></h4>
+<p></p>
+<h4>period <sup>string</sup></h4>
+<p>&#34;week&#34;, &#34;week-cur&#34;, or n days: &#34;8&#34;</p>
+
+		</div>
+		<h3 id="goatcounter.Widget">goatcounter.Widget <a class="permalink" href="#goatcounter.Widget">§</a></h3>
+		<div class="endpoint model">
+			<p class="info"></p>
+			
 		</div>
 		<h3 id="handlers.APICountRequest">handlers.APICountRequest <a class="permalink" href="#handlers.APICountRequest">§</a></h3>
 		<div class="endpoint model">
@@ -17230,9 +17261,9 @@ identifier.</p><p>You can also just disable sessions entirely with NoSessions.</
 		<h3 id="handlers.apiError">handlers.apiError <a class="permalink" href="#handlers.apiError">§</a></h3>
 		<div class="endpoint model">
 			<p class="info"></p>
-			<h4>Error <sup>string</sup></h4>
+			<h4>error <sup>string</sup></h4>
 <p></p>
-<h4>Errors <sup><a href="#"></a></sup></h4>
+<h4>errors <sup><a href="#"></a></sup></h4>
 <p></p>
 
 		</div>
@@ -17292,8 +17323,8 @@ depending on whether daylight savings time is in use at the time instant.</p>
 <p>ID</p>
 <h4>Zone <sup>string</sup></h4>
 <p>Asia/Makassar</p>
-<h4>Abbr <sup>string</sup></h4>
-<p>WITA</p>
+<h4>Abbr <sup>array [type: string]</sup></h4>
+<p>WITA – the correct abbreviation may change depending on the time of year (i.e. CET and CEST, depending on DST).</p>
 <h4>CountryName <sup>string</sup></h4>
 <p>Indonesia</p>
 <h4>Comments <sup>string</sup></h4>
@@ -17508,6 +17539,7 @@ depending on whether daylight savings time is in use at the time instant.</p>
     },
     "/api/v0/export/{id}/download": {
       "get": {
+        "description": "The export may take a while to generate, depending on the size. It will\nreturn a 202 Accepted status code if the export ID is still running.\n\nExport files are kept for 24 hours, after which they're deleted. This will\nreturn a 400 Gone status code if the export has been deleted.",
         "operationId": "GET_api_v0_export_{id}_download",
         "parameters": [
           {
@@ -17524,6 +17556,12 @@ depending on whether daylight savings time is in use at the time instant.</p>
         "responses": {
           "200": {
             "description": "200 OK (text/csv data)"
+          },
+          "202": {
+            "description": "202 Accepted",
+            "schema": {
+              "$ref": "#/definitions/handlers.apiError"
+            }
           },
           "400": {
             "description": "400 Bad Request",
@@ -17602,7 +17640,7 @@ depending on whether daylight savings time is in use at the time instant.</p>
             }
           }
         },
-        "summary": "List the current site and all additional sites.",
+        "summary": "List all sites.",
         "tags": [
           "sites"
         ]
@@ -17938,6 +17976,7 @@ depending on whether daylight savings time is in use at the time instant.</p>
     },
     "goatcounter.SiteSettings": {
       "title": "SiteSettings",
+      "description": "SiteSettings contains all the user-configurable settings for a site, with\nthe exception of the domain and billing settings.\n\nThis is stored as JSON in the database.",
       "type": "object",
       "properties": {
         "allow_admin": {
@@ -17964,20 +18003,6 @@ depending on whether daylight savings time is in use at the time instant.</p>
             "type": "string"
           }
         },
-        "limits": {
-          "type": "object",
-          "properties": {
-            "hchart": {
-              "type": "integer"
-            },
-            "page": {
-              "type": "integer"
-            },
-            "ref": {
-              "type": "integer"
-            }
-          }
-        },
         "number_format": {
           "type": "string"
         },
@@ -17992,6 +18017,18 @@ depending on whether daylight savings time is in use at the time instant.</p>
         },
         "twenty_four_hours": {
           "type": "boolean"
+        },
+        "views": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/goatcounter.View"
+          }
+        },
+        "widgets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/goatcounter.Widget"
+          }
         }
       }
     },
@@ -18044,6 +18081,32 @@ depending on whether daylight savings time is in use at the time instant.</p>
           "readOnly": true
         }
       }
+    },
+    "goatcounter.View": {
+      "title": "View",
+      "type": "object",
+      "properties": {
+        "as-text": {
+          "type": "boolean"
+        },
+        "daily": {
+          "type": "boolean"
+        },
+        "filter": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "period": {
+          "description": "\"week\", \"week-cur\", or n days: \"8\"",
+          "type": "string"
+        }
+      }
+    },
+    "goatcounter.Widget": {
+      "title": "Widget",
+      "type": "object"
     },
     "handlers.APICountRequest": {
       "title": "APICountRequest",
@@ -18126,10 +18189,10 @@ depending on whether daylight savings time is in use at the time instant.</p>
       "title": "apiError",
       "type": "object",
       "properties": {
-        "Error": {
+        "error": {
           "type": "string"
         },
-        "Errors": {
+        "errors": {
           "type": "object"
         }
       }
@@ -18198,8 +18261,11 @@ depending on whether daylight savings time is in use at the time instant.</p>
       "type": "object",
       "properties": {
         "Abbr": {
-          "description": "WITA",
-          "type": "string"
+          "description": "WITA – the correct abbreviation may change depending on the time of year (i.e. CET and CEST, depending on DST).",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         },
         "Comments": {
           "description": "Borneo (east, south); Sulawesi/Celebes, Bali, Nusa Tengarra; Timor (west)",
